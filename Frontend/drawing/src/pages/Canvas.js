@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import io from 'socket.io-client';
 import styled from '@emotion/styled';
@@ -12,14 +12,16 @@ const Canvas = ({ height, width }) => {
     window.location.pathname === '/container/board'
       ? io('http://localhost:5000/container/board')
       : io('http://localhost:5000');
+
   const canvasRef = useRef(null);
   const isDrawingRef = useRef(false);
   const prevPointRef = useRef(null);
+  const [erase, setEraseAll] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
+    canvas.width = width;
     canvas.height = height;
 
     const computePointInCanvas = (clientX, clientY) => {
@@ -41,7 +43,6 @@ const Canvas = ({ height, width }) => {
       ctx.moveTo(start.x, start.y);
       ctx.lineTo(end.x, end.y);
       ctx.stroke();
-      socket.emit('canvas-draw', canvas.toDataURL('image/png'));
     };
 
     const onMouseDown = (e) => {
@@ -53,7 +54,23 @@ const Canvas = ({ height, width }) => {
     const onMouseMove = (e) => {
       if (!isDrawingRef.current) return;
       const endPoint = computePointInCanvas(e.clientX, e.clientY);
-      drawLine(prevPointRef.current, endPoint, context, '#000000', 5);
+
+      if (context.globalCompositeOperation === 'destination-out') {
+        context.clearRect(endPoint.x - 5, endPoint.y - 5, 15, 15);
+        socket.emit('canvas-erase', {
+          x: endPoint.x,
+          y: endPoint.y,
+        });
+      } else if (erase) {
+        socket.emit('canvas-erase-all');
+      } else {
+        drawLine(prevPointRef.current, endPoint, context, '#000000', 7);
+        socket.emit('canvas-draw', {
+          start: prevPointRef.current,
+          end: endPoint,
+        });
+      }
+
       prevPointRef.current = endPoint;
     };
 
@@ -61,15 +78,20 @@ const Canvas = ({ height, width }) => {
       isDrawingRef.current = false;
       prevPointRef.current = null;
     };
+
     canvas.addEventListener('mousedown', onMouseDown);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseup', onMouseUp);
+
     socket.on('canvas-draw', (data) => {
-      var img = new Image();
-      img.onload = function () {
-        context.drawImage(img, 0, 0);
-      };
-      img.src = data;
+      drawLine(data.start, data.end, context, '#000000', 7);
+    });
+
+    socket.on('canvas-erase', (data) => {
+      context.clearRect(data.x - 5, data.y - 5, 15, 15);
+    });
+    socket.on('canvas-erase-all', () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
     });
 
     return () => {
@@ -78,22 +100,23 @@ const Canvas = ({ height, width }) => {
       canvas.removeEventListener('mouseup', onMouseUp);
     };
   }, [socket]);
-  const setToErase = () => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
-    context.globalCompositeOperation = 'destination-out';
-  };
 
   const setToDraw = () => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
+    const context = canvas.getContext('2d');
     context.globalCompositeOperation = 'source-over';
   };
 
-  const eraseAll = () => {
+  const setToErase = () => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    const context = canvas.getContext('2d');
+    context.globalCompositeOperation = 'destination-out';
+  };
+
+  const eraseAll = () => {
+    setEraseAll(true);
+    socket.emit('canvas-erase-all');
+    setEraseAll(false);
   };
 
   return (

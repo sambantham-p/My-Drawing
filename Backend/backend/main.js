@@ -27,9 +27,8 @@ io.of('/container/board').on('connection', (socket) => {
     socket.broadcast.emit('canvas-erase', eraseData);
   });
 
-  socket.on('canvas-erase-all', (eraseAllDataUrl) => {
-    // Handle erase all action here, you can clear the entire canvas
-    socket.broadcast.emit('canvas-erase-All', eraseAllDataUrl);
+  socket.on('canvas-erase-all', () => {
+    socket.broadcast.emit('canvas-erase-all'); // Broadcast 'canvas-erase-all' to all clients except the sender
   });
   socket.on('disconnect', () => {
     console.log('User disconnected from /container/board');
