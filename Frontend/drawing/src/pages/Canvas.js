@@ -16,7 +16,6 @@ const Canvas = ({ height, width }) => {
   const canvasRef = useRef(null);
   const isDrawingRef = useRef(false);
   const prevPointRef = useRef(null);
-  const [erase, setEraseAll] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -61,8 +60,6 @@ const Canvas = ({ height, width }) => {
           x: endPoint.x,
           y: endPoint.y,
         });
-      } else if (erase) {
-        socket.emit('canvas-erase-all');
       } else {
         drawLine(prevPointRef.current, endPoint, context, '#000000', 7);
         socket.emit('canvas-draw', {
@@ -90,9 +87,6 @@ const Canvas = ({ height, width }) => {
     socket.on('canvas-erase', (data) => {
       context.clearRect(data.x - 5, data.y - 5, 15, 15);
     });
-    socket.on('canvas-erase-all', () => {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    });
 
     return () => {
       canvas.removeEventListener('mousedown', onMouseDown);
@@ -114,9 +108,9 @@ const Canvas = ({ height, width }) => {
   };
 
   const eraseAll = () => {
-    setEraseAll(true);
-    socket.emit('canvas-erase-all');
-    setEraseAll(false);
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   return (
