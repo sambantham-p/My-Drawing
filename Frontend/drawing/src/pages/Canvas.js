@@ -5,11 +5,9 @@ import styled from '@emotion/styled';
 
 const CanvasStyle = styled.div`
   border: 7px solid black;
-  width: 100%;
-  height: 100%;
 `;
 
-const Canvas = ({ width, height }) => {
+const Canvas = ({ height, width }) => {
   const socket =
     window.location.pathname === '/container/board'
       ? io('http://localhost:5000/container/board')
@@ -22,7 +20,7 @@ const Canvas = ({ width, height }) => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = height;
 
     const computePointInCanvas = (clientX, clientY) => {
       const boundingRect = canvas.getBoundingClientRect();
@@ -43,8 +41,6 @@ const Canvas = ({ width, height }) => {
       ctx.moveTo(start.x, start.y);
       ctx.lineTo(end.x, end.y);
       ctx.stroke();
-
-      // Emit canvas data to the server
       socket.emit('canvas-draw', canvas.toDataURL('image/png'));
     };
 
@@ -65,13 +61,9 @@ const Canvas = ({ width, height }) => {
       isDrawingRef.current = false;
       prevPointRef.current = null;
     };
-
-    // Attach event listeners to the canvas
     canvas.addEventListener('mousedown', onMouseDown);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseup', onMouseUp);
-
-    // Listen for incoming canvas data from the server
     socket.on('canvas-draw', (data) => {
       var img = new Image();
       img.onload = function () {
@@ -81,17 +73,49 @@ const Canvas = ({ width, height }) => {
     });
 
     return () => {
-      // Remove event listeners when the component unmounts
       canvas.removeEventListener('mousedown', onMouseDown);
       canvas.removeEventListener('mousemove', onMouseMove);
       canvas.removeEventListener('mouseup', onMouseUp);
     };
   }, [socket]);
+  const setToErase = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    context.globalCompositeOperation = 'destination-out';
+    if (isDrawingRef === false) {
+      console.log('IMG', canvas.toDataURL('image/png'));
+      socket.emit('canvas-erase', canvas.toDataURL('image/png'));
+    }
+  };
+
+  const setToDraw = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    context.globalCompositeOperation = 'source-over';
+  };
+
+  const eraseAll = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  };
 
   return (
-    <CanvasStyle>
-      <canvas ref={canvasRef} height={height} width={width} id='board'></canvas>
-    </CanvasStyle>
+    <>
+      <CanvasStyle>
+        <canvas
+          ref={canvasRef}
+          height={height}
+          width={width}
+          id='board'
+        ></canvas>
+      </CanvasStyle>
+      <div>
+        <button onClick={setToErase}>ERASE</button>
+        <button onClick={setToDraw}>DRAW</button>
+        <button onClick={eraseAll}>ERASE ALL</button>
+      </div>
+    </>
   );
 };
 

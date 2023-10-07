@@ -7,13 +7,13 @@ import styled from '@emotion/styled';
 const Board = () => {
   const Container = styled.div`
     width: 100%;
-    height: 100%;
+    padding-top: 20px;
   `;
   return (
     <>
       <Header header={HeaderConstants.BOARD} />;
       <Container>
-        <Canvas height={800} width={300} />
+        <Canvas height={750} width={1062} />
       </Container>
     </>
   );

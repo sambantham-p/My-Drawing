@@ -7,7 +7,6 @@ import styled from '@emotion/styled';
 const Container = () => {
   const WhiteBoard = styled.div`
     width: 100%;
-    height: 100%;
     background: white;
   `;
   return (
