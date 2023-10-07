@@ -82,10 +82,6 @@ const Canvas = ({ height, width }) => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d');
     context.globalCompositeOperation = 'destination-out';
-    if (isDrawingRef === false) {
-      console.log('IMG', canvas.toDataURL('image/png'));
-      socket.emit('canvas-erase', canvas.toDataURL('image/png'));
-    }
   };
 
   const setToDraw = () => {
