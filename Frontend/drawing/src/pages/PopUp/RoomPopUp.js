@@ -53,7 +53,8 @@ const RoomPopUP = ({ open, roomId, onClose }) => {
   const [copyText, setCopyText] = useState('');
   useEffect(() => {
     setCopyText(
-      'http://localhost:3000' + routeConstant.BOARD.replace(':uuid', roomId)
+      'https://let-us-draw.vercel.app' +
+        routeConstant.BOARD.replace(':uuid', roomId)
     );
   }, [open]);
   const handleConfirm = () => {
