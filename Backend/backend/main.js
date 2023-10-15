@@ -5,7 +5,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   cors: {
-    origin: ['https://lets-draw-backend.vercel.app'],
+    origin: ['https://lets-draw-backend.vercel.app/'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
