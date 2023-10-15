@@ -1,11 +1,11 @@
 const express = require('express');
-const port = process.env.PORT || 5000;
 const cors = require('cors');
 const app = express();
 const dotenv = require('dotenv');
 const path = require('path');
 const envPath = path.join(__dirname, '..', '..', '.env');
 dotenv.config({ path: envPath });
+const port = process.env.PORT || 5000;
 console.log('env', process.env.NODE_ENV);
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
