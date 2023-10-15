@@ -1,18 +1,37 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import io from 'socket.io-client';
+import { saveAs } from 'file-saver';
 import styled from '@emotion/styled';
 
 const CanvasStyle = styled.div`
   border: 7px solid black;
 `;
+const Button = styled.button`
+  width: 15%;
+  padding: 10px 20px;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 
-const Canvas = ({ height, width }) => {
-  const socket =
-    window.location.pathname === '/container/board'
-      ? io('http://localhost:5000/container/board')
-      : io('http://localhost:5000');
+  &:hover {
+    background-color: #1e87e5;
+  }
+`;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 30px;
+  margin: 20px 20px;
+`;
+
+const Canvas = ({ height, width, room }) => {
+  const socket = io('http://localhost:3001');
+
+  socket.emit('join-room', room);
   const canvasRef = useRef(null);
   const isDrawingRef = useRef(false);
   const prevPointRef = useRef(null);
@@ -59,12 +78,14 @@ const Canvas = ({ height, width }) => {
         socket.emit('canvas-erase', {
           x: endPoint.x,
           y: endPoint.y,
+          room,
         });
       } else {
         drawLine(prevPointRef.current, endPoint, context, '#000000', 7);
         socket.emit('canvas-draw', {
           start: prevPointRef.current,
           end: endPoint,
+          room,
         });
       }
 
@@ -79,7 +100,6 @@ const Canvas = ({ height, width }) => {
     canvas.addEventListener('mousedown', onMouseDown);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseup', onMouseUp);
-
     socket.on('canvas-draw', (data) => {
       drawLine(data.start, data.end, context, '#000000', 7);
     });
@@ -113,6 +133,14 @@ const Canvas = ({ height, width }) => {
     context.clearRect(0, 0, canvas.width, canvas.height);
   };
 
+  const saveAsImage = () => {
+    const canvas = canvasRef.current;
+
+    canvas.toBlob((blob) => {
+      saveAs(blob, 'my-drawing.png');
+    }, 'image/png');
+  };
+
   return (
     <>
       <CanvasStyle>
@@ -123,11 +151,21 @@ const Canvas = ({ height, width }) => {
           id='board'
         ></canvas>
       </CanvasStyle>
-      <div>
-        <button onClick={setToErase}>ERASE</button>
-        <button onClick={setToDraw}>DRAW</button>
-        <button onClick={eraseAll}>ERASE ALL</button>
-      </div>
+      <ButtonContainer>
+        <Button onClick={setToDraw} style={{ backgroundColor: 'green' }}>
+          DRAW
+        </Button>
+        <Button onClick={setToErase} style={{ backgroundColor: 'red' }}>
+          ERASE
+        </Button>
+
+        <Button onClick={eraseAll} style={{ backgroundColor: 'purple' }}>
+          ERASE ALL
+        </Button>
+        <Button onClick={saveAsImage} style={{ backgroundColor: 'orange' }}>
+          SAVE AS
+        </Button>
+      </ButtonContainer>
     </>
   );
 };

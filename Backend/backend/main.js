@@ -1,11 +1,11 @@
 const express = require('express');
-const port = 5000;
+const port = 3001;
 const cors = require('cors');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:5000'],
+    origin: ['http://localhost:3000'],
     methods: ['GET', 'POST'],
   },
 });
@@ -17,21 +17,25 @@ app.get('/', (req, res) => {
 app.get('*', (req, res) => {
   res.send('404 Page Not Found');
 });
-io.of('/container/board').on('connection', (socket) => {
-  console.log('User connected to /container/board');
+io.on('connection', (socket) => {
+  console.log('User conneected');
+  socket.on('join-room', (room) => {
+    console.log('User joined room:', room);
+    socket.join(room);
+  });
 
   socket.on('canvas-draw', (draw) => {
-    socket.broadcast.emit('canvas-draw', draw);
-  });
-  socket.on('canvas-erase', (eraseData) => {
-    socket.broadcast.emit('canvas-erase', eraseData);
+    // Emit 'canvas-draw' only to users in the same room
+    io.to(draw.room).emit('canvas-draw', draw);
   });
 
-  socket.on('canvas-erase-all', () => {
-    socket.broadcast.emit('canvas-erase-all'); // Broadcast 'canvas-erase-all' to all clients except the sender
+  socket.on('canvas-erase', (eraseData) => {
+    // Emit 'canvas-erase' only to users in the same room
+    io.to(eraseData.room).emit('canvas-erase', eraseData);
   });
+
   socket.on('disconnect', () => {
-    console.log('User disconnected from /container/board');
+    console.log('User disconnected ');
   });
 });
 http.listen(port, () => {

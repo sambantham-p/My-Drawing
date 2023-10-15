@@ -1,7 +1,6 @@
 const routeConstant = {
   CONTAINER: '/container',
-  BOARD: '/container/board',
-  ROOM: '/container/board/room',
+  BOARD: '/container/board/:uuid',
   HOME: '/',
   ERROR: '/errorPage',
 };

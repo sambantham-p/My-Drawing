@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import PopUp from '../PopUp/PopUp';
+import RoomPopUP from '../PopUp/RoomPopUp';
 import routeConstant from '../../routes/routeConstant';
 import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
+import { v4 } from 'uuid';
 
 const Home = () => {
+  const room = {};
+  room.id = v4();
   const Container = styled.div`
     width: 100%;
     height: 100vh;
@@ -72,13 +77,18 @@ const Home = () => {
   `;
 
   const [selectedOption, setSelectedOption] = useState('solo');
+  const [isRoomPopUpOpen, setIsRoomPopUpOpen] = useState(false);
+  useEffect(() => {
+    console.log('ROOM POP UP', isRoomPopUpOpen);
+  }, [isRoomPopUpOpen]);
   const navigate = useNavigate();
 
-  // Define the handleOptionChange function
   const handleOptionChange = (e) => {
     setSelectedOption(e.target.value);
   };
-
+  const handleClosePopUp = () => {
+    setIsRoomPopUpOpen(false);
+  };
   return (
     <Container>
       <Title>WELCOME TO MY DRAWING</Title>
@@ -111,13 +121,22 @@ const Home = () => {
         onClick={() => {
           if (selectedOption === 'solo') {
             navigate(routeConstant.CONTAINER);
+            setIsRoomPopUpOpen(false);
           } else if (selectedOption === 'share') {
-            navigate(routeConstant.BOARD);
+            setIsRoomPopUpOpen(true);
           }
         }}
       >
         Get Started
       </Button>
+
+      {isRoomPopUpOpen && (
+        <RoomPopUP
+          open={isRoomPopUpOpen}
+          onClose={handleClosePopUp}
+          roomId={room.id}
+        />
+      )}
     </Container>
   );
 };

@@ -5,6 +5,9 @@ import React from 'react';
 import styled from '@emotion/styled';
 
 const Board = () => {
+  console.log('board', window.location.pathname.split('/').slice(-1)[0]);
+  const roomId = window.location.pathname.split('/').slice(-1)[0];
+
   const Container = styled.div`
     width: 100%;
     padding-top: 20px;
@@ -13,7 +16,7 @@ const Board = () => {
     <>
       <Header header={HeaderConstants.BOARD} />;
       <Container>
-        <Canvas height={750} width={1062} />
+        <Canvas height={750} width={1062} room={roomId} />
       </Container>
     </>
   );
