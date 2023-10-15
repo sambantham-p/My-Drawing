@@ -29,7 +29,7 @@ const ButtonContainer = styled.div`
 `;
 
 const Canvas = ({ height, width, room }) => {
-  const socket = io('http://localhost:3001');
+  const socket = io('https://lets-draw.vercel.app');
 
   socket.emit('join-room', room);
   const canvasRef = useRef(null);
