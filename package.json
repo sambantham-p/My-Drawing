@@ -7,9 +7,10 @@
   "main": "main.js",
   "devDependencies": {
     "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "babel-preset-react": "^6.24.1"
   },
   "scripts": {
     "start": "node backend/backend/main.js",
