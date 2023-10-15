@@ -9,6 +9,7 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  transports: ['websocket'],
 });
 app.use(cors());
 app.get('/', (req, res) => {
