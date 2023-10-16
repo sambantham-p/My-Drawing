@@ -1,7 +1,8 @@
 {
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "7.14.5",
     "dotenv": "^16.3.1",
-    "@babel/plugin-proposal-class-properties": "7.14.5"
+    "express": "^4.18.2"
   },
   "name": "drawing",
   "version": "1.0.0",
