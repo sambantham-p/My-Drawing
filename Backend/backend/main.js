@@ -6,7 +6,6 @@ const path = require('path');
 const envPath = path.join(__dirname, '..', '..', '.env');
 dotenv.config({ path: envPath });
 const port = process.env.PORT || 5000;
-console.log('env', process.env.NODE_ENV);
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   cors: {
@@ -18,30 +17,13 @@ const io = require('socket.io')(http, {
 });
 app.use(cors());
 
-// DEPLOYMENT PRODUCTION
-console.log('path', path.resolve());
-const frontendBuildPath = path.join(
-  __dirname,
-  '..',
-  '..',
-  'Frontend',
-  'drawing',
-  'build'
-);
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(frontendBuildPath)));
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(frontendBuildPath, 'index.html'));
-  });
-} else {
-  app.get('/', (req, res) => {
-    console.log('in home');
-    res.send('Board/Container route');
-  });
-  app.get('*', (req, res) => {
-    res.send('404 Page Not Found');
-  });
-}
+app.get('/', (req, res) => {
+  console.log('in home');
+  res.send('Board/Container route');
+});
+app.get('*', (req, res) => {
+  res.send('404 Page Not Found');
+});
 
 io.on('connection', (socket) => {
   console.log('User conneected');
