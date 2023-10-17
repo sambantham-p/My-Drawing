@@ -41,7 +41,7 @@ const Canvas = ({ height, width, room }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    canvas.width = width;
+    canvas.width = window.innerWidth;
     canvas.height = height;
 
     const computePointInCanvas = (clientX, clientY) => {
